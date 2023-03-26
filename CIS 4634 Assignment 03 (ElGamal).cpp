@@ -33,22 +33,18 @@ public:
     }
 
     int get_prime() {
-        //public_key[0] = 11;         //FIXME
         return public_key[0];
     }
 
     int get_alpha() {
-        //public_key[1] = 2;         //FIXME
         return public_key[1];
     }
 
     int get_x() {
-        //public_key[2] = 9;   //FIXME
         return public_key[2];
     }
 
     int get_a() {
-        //private_key = 6;        //FIXME
         return private_key;
     }
 
@@ -79,7 +75,6 @@ string unmap_message(int[], int, int, int);
 * @return 1 if number is prime, 0 if composite
 */
 bool fermat_primality(int n, int t) {
-    //cout << "DEBUG " << "entered fermat" << endl;
     if (n < 2 || n % 2 == 0) {
         return 0;
     }
@@ -109,7 +104,6 @@ bool fermat_primality(int n, int t) {
 * @return 1 if number is prime, 0 if composite
 */
 bool miller_rabin_primality(int n, int t) {
-    //cout << "DEBUG " << "entered miller-rabin" << endl;
     if (n < 2 || n % 2 == 0) {
         return 0;
     }
@@ -175,13 +169,6 @@ int square_and_mult(int a, int k, int n) {
     int len = binary_size(k);
     int* k_bin = new int[len];
     dec_to_binary(k, k_bin, len, true);
-
-    //cout << "DEBUG " << "len is " << len << endl;
-    //cout << "DEBUG " << "k_bin is ";
-    //for (int i = 0; i < len; i++) {
-    //    cout << k_bin[i];
-    //}
-    //cout << endl;
 
     int b = 1;
 
@@ -363,7 +350,6 @@ int binary_to_dec(int binary[], int bin_len) {
 * @return the generated prime
 */
 int generate_prime(int bit_size, int& generator) {
-    cout << "DEBUG " << "entered gen_prime" << endl;
     while (true) {
         bool is_prime = false;
         // can generate a prime of bit size n between by generating
@@ -371,8 +357,6 @@ int generate_prime(int bit_size, int& generator) {
         int ub = pow(2, bit_size) - 1;
         int lb = pow(2, bit_size - 1) + 1;
         int p = (rand() % (ub - lb + 1)) + lb;
-
-        //cout << "DEBUG " << "prime is " << p << ", moving to testing" << endl;
 
         if (bit_size < 8) {
             is_prime = fermat_primality(p, 15);
@@ -386,7 +370,6 @@ int generate_prime(int bit_size, int& generator) {
         }
 
         int q = safe_prime(bit_size, p);
-        //cout << "DEBUG " << "safe prime is " << q << endl;
 
         if (q != 0) {
             generator = field_generator(p, q);
@@ -401,7 +384,6 @@ int generate_prime(int bit_size, int& generator) {
 * @return 0 if prime is not safe, q of q = (p - 1) / 2 if prime is safe
 */
 int safe_prime(int bit_size, int p) {
-    //cout << "DEBUG " << "entered safe_prime" << endl;
     bool is_prime = false;
     int q = (p - 1) / 2;
 
@@ -426,7 +408,6 @@ int safe_prime(int bit_size, int p) {
 * @return generator of a finite field for p
 */
 int field_generator(int p, int q) {
-    //cout << "DEBUG " << "entered field_gen" << endl;
     int g;
     int ub = p - 2;
     int lb = 2;
@@ -437,9 +418,6 @@ int field_generator(int p, int q) {
     // or g is a generator for p
     while (true) {
         g = (rand() % (ub - lb + 1)) + lb;
-
-        //cout << "DEBUG " << "g is " << g << endl;
-        //cout << "DEBUG " << "g^2 is " << square_and_mult(g, 2, p) << ", g^q is " << square_and_mult(g, q, p) << endl;
 
         if (square_and_mult(g, 2, p) == 1) {
             continue;
@@ -459,10 +437,9 @@ int field_generator(int p, int q) {
 * @param p the prime
 */
 void key_generation(Keys& keys, int prime_len) {
-    cout << "generating " << prime_len << " bit prime, testing safety" << endl;
+    cout << "Generating " << prime_len << " bit prime, testing safety..." << endl << endl;
     int alpha;
     int p = generate_prime(prime_len, alpha);
-    cout << "safe prime is " << p << ", generator is " << alpha << endl;
 
     int ub = p - 2;
     int lb = 1;
@@ -473,8 +450,8 @@ void key_generation(Keys& keys, int prime_len) {
 
     keys.set_pub_key(p, alpha, x);
     keys.set_priv_key(a);
-    cout << "pub key is " << keys.get_prime() << ", " << keys.get_alpha() << ", " << keys.get_x() << endl;
-    cout << "priv key is " << keys.get_a() << endl;
+    cout << "Public key (prime, alpha, x) is " << keys.get_prime() << ", " << keys.get_alpha() << ", " << keys.get_x() << endl;
+    cout << "Private key (a) is " << keys.get_a() << endl << endl;
 }
 
 /*
@@ -488,11 +465,9 @@ void encrypt(int& gamma, int delta[], Keys keys, int msg[], int num_blocks) {
     int ub = keys.get_prime() - 2;
     int lb = 1;
     int k = (rand() % (ub - lb + 1)) + lb;
-    //cout << "DEBUG " << "k is " << k << endl;
 
     gamma = square_and_mult(keys.get_alpha(), k, keys.get_prime());
     int d = square_and_mult(keys.get_x(), k, keys.get_prime());
-    //cout << "DEBUG " << "d is " << d << endl;
     for (int i = 0; i < num_blocks; i++) {
         delta[i] = (d * msg[i]) % keys.get_prime();
     }
@@ -530,11 +505,6 @@ void map_message(string msg, int map_msg[], int block_size, int num_blocks, int 
 
     // fill bin_msg
     hex_to_binary(msg, bin_msg, bin_msg_len);
-    //cout << "DEBUG " << "binary msg is ";
-    //for (int i = 0; i < bin_msg_len; i++) {
-    //    cout << bin_msg[i];
-    //}
-    //cout << endl;
 
     // convert bin_msg to bin_map_msg
     int bin_remaining = bin_msg_len;
@@ -571,16 +541,6 @@ void map_message(string msg, int map_msg[], int block_size, int num_blocks, int 
         }
     }
 
-    //cout << "DEBUG " << "bin map msg is..." << endl;;
-    //for (int i = 0; i < num_blocks; i++) {
-    //    cout << "...";
-    //    for (int j = 0; j < block_size; j++) {
-    //        cout << bin_map_msg[i][j];
-    //    }
-    //    cout << endl;
-    //}
-    //cout << endl;
-
     // map binary msg to the finite field
     for (int i = 0; i < num_blocks; i++) {
         map_msg[i] = binary_to_dec(bin_map_msg[i], block_size);
@@ -594,6 +554,13 @@ void map_message(string msg, int map_msg[], int block_size, int num_blocks, int 
     delete[] bin_map_msg;
 }
 
+/*
+* @param decoded_mapped_msg[] the decoded message in decimal
+* @param block_size the size of the message blocks
+* @param num_blocks the number of message blocks
+* @param bin_msg_len the length of the message in binary
+* @return the decoded message in hexadecimal
+*/
 string unmap_message(int decoded_mapped_msg[], int block_size, int num_blocks, int bin_msg_len) {
     // will hold the decoded binary message in blocks
     int** decode_bin = new int* [num_blocks];
@@ -629,196 +596,70 @@ string unmap_message(int decoded_mapped_msg[], int block_size, int num_blocks, i
 
 int main() {
     Keys keys = Keys();
-    //string msg = "AB";
 
+    // get hex message
     string msg;
     cout << "Please enter your message in hexadecimal" << endl;
     cin >> msg;
+    cout << endl;
     
     // make hex uppercase
     for (int i = 0; i < msg.length(); i++) {
         msg[i] = toupper(msg[i]);
     }
 
+    // get key length
     int prime_len;
     cout << "Please enter the desired length of the prime" << endl;
     cout << "Valid lengths range from 2 to 16" << endl;
     cin >> prime_len;
+    cout << endl;
 
+    // generate keys
     key_generation(keys, prime_len);
 
     // make block size 1 less than key size
     int block_size = binary_size(keys.get_prime()) - 1;
-    cout << "DEBUG " << "block size is " << block_size << endl;
+    cout << "Block size is " << block_size << endl;
 
+    // calculate number of blocks needed
     int bin_msg_len = 4 * msg.length();
     int num_blocks = ceil((double)bin_msg_len / block_size);
-    cout << "DEBUG " << "bin msg len is " << bin_msg_len << endl;
-    cout << "DEBUG " << "num blocks is " << num_blocks << endl;
+    cout << "Number of blocks is " << num_blocks << endl << endl;
 
     // will hold mapped message
     int* map_msg = new int[num_blocks];
 
     // map message
     map_message(msg, map_msg, block_size, num_blocks, bin_msg_len);
-    cout << "DEBUG " << "mapped msg is ";
+    cout << "Mapped message is..." << endl;
     for (int i = 0; i < num_blocks; i++) {
-        cout << map_msg[i] << ", ";
+        cout << "..." << map_msg[i] << endl;
     }
-    cout << endl;
+    cout << endl;;
 
-    ///////////////////////////////////////////////////////////////////////////////
-
-    //// bin_msg contains msg without blocks
-    //int* bin_msg = new int[bin_msg_len];
-
-    //// bin_map_msg contains ceil(length/blocksize) number of blocksize arrays
-    //int** bin_map_msg = new int*[num_blocks];       
-    //for (int i = 0; i < num_blocks; i++) {
-    //    bin_map_msg[i] = new int[block_size];
-    //}
-
-    //// fill bin_msg
-    //hex_to_binary(msg, bin_msg, bin_msg_len);
-    //cout << "DEBUG " << "binary msg is ";
-    //for (int i = 0; i < bin_msg_len; i++) {
-    //    cout << bin_msg[i];
-    //}
-    //cout << endl;
-
-    //// convert bin_msg to bin_map_msg
-    //int bin_remaining = bin_msg_len;
-    //bool first = true;
-    //for (int i = 0; i < num_blocks; i++) {
-    //    // if only one block total
-    //    if (bin_remaining <= block_size && first) {
-    //        for (int j = 0; j < bin_msg_len; j++) {
-    //            bin_map_msg[i][j] = bin_msg[i];
-    //        }
-    //        // fill with trailing 0's
-    //        for (int j = bin_remaining; j < block_size; j++) {
-    //            bin_map_msg[i][j] = 0;
-    //        }
-    //        first = false;
-    //    }
-    //    // if only one block left
-    //    else if (bin_remaining <= block_size) {
-    //        for (int j = 0; j < bin_remaining; j++) {
-    //            bin_map_msg[i][j] = bin_msg[(i * block_size) + j];
-    //        }
-    //        // fill with trailing 0's
-    //        for (int j = bin_remaining; j < block_size; j++) {
-    //            bin_map_msg[i][j] = 0;
-    //        }
-    //    }
-    //    // if multiple blocks left
-    //    else {
-    //        for (int j = 0; j < block_size; j++) {
-    //            bin_map_msg[i][j] = bin_msg[(i * block_size) + j];
-    //        }
-    //        bin_remaining -= block_size;
-    //        first = false;
-    //    }
-    //}
-
-    //cout << "DEBUG " << "bin map msg is..." << endl;;
-    //for (int i = 0; i < num_blocks; i++) {
-    //    cout << "...";
-    //    for (int j = 0; j < block_size; j++) {
-    //        cout << bin_map_msg[i][j];
-    //    }
-    //    cout << endl;
-    //}
-    //cout << endl;
-
-    //// map binary msg to the finite field
-    //int* dec_map_msg = new int[num_blocks];
-    //for (int i = 0; i < num_blocks; i++) {
-    //    dec_map_msg[i] = binary_to_dec(bin_map_msg[i], block_size);
-    //}
-
-    //cout << "DEBUG " << "dec mapped msg is ";
-    //for (int i = 0; i < num_blocks; i++) {
-    //    cout << dec_map_msg[i] << ", ";
-    //}
-    //cout << endl;
-
-    ///////////////////////////////////////////////
-
+    // encrypt message
     int gamma;
     int* delta = new int[num_blocks];
     encrypt(gamma, delta, keys, map_msg, num_blocks);
 
-    cout << "DEBUG " << "delta is ";
+    cout << "Ciphertext (gamma, delta) is..." << endl;
     for (int i = 0; i < num_blocks; i++) {
-        cout << delta[i] << ", ";
+        cout << "...(" << gamma << ", " << delta[i] << ")" << endl;;
     }
     cout << endl;
-    cout << "DEBUG " << "gamma is " << gamma << endl;
 
-
+    // decrypt message
     int* decode_map_msg = new int[num_blocks];
     decrypt(gamma, delta, keys, decode_map_msg, num_blocks);
-    //cout << "DEBUG " << "decoded is ";
-    //for (int i = 0; i < num_blocks; i++) {
-    //    cout << decode_map_msg[i] << ", ";
-    //}
-    //cout << endl;
-
-    //////////////////////////////////////////////////////////////
-
-    //int** decode_bin = new int*[num_blocks];
-    ////int decode_bin_len = binary_size(decode_msg[0]);
-    //for (int i = 0; i < num_blocks; i++) {
-    //    decode_bin[i] = new int[block_size];
-    //}
-
-    //for (int i = 0; i < num_blocks; i++) {
-    //    dec_to_binary(decode_map_msg[i], decode_bin[i], block_size, false);
-    //}
-
-    //cout << "DEBUG " << "decoded bin is..." << endl;;
-    //for (int i = 0; i < num_blocks; i++) {
-    //    cout << "...";
-    //    for (int j = 0; j < block_size; j++) {
-    //        cout << decode_bin[i][j];
-    //    }
-    //    cout << endl;
-    //}
-    //cout << endl;
-
-    //int* decode_bin_flat = new int[num_blocks * block_size];
-    //for (int i = 0; i < num_blocks; i++) {
-    //    for (int j = 0; j < block_size; j++) {
-    //        decode_bin_flat[i * block_size + j] = decode_bin[i][j];
-    //    }
-    //}
-
-    //cout << "DEBUG " << "decode bin flat is ";
-    //for (int i = 0; i < num_blocks * block_size; i++) {
-    //    cout << decode_bin_flat[i];
-    //}
-    //cout << endl;
-
-    //string decode_string = binary_to_hex(decode_bin_flat, bin_msg_len);
-    //cout << decode_string;
-
+    
+    // unmap message
     string decoded_string = unmap_message(decode_map_msg, block_size, num_blocks, bin_msg_len);
     cout << "Decoded message is " << decoded_string;
 
-    /*delete[] bin_msg;
-    for (int i = 0; i < num_blocks; i++) {
-        delete[] bin_map_msg[i];
-    }
-    delete[] bin_map_msg;*/
     delete[] map_msg;
     delete[] delta;
     delete[] decode_map_msg;
-    /*for (int i = 0; i < num_blocks; i++) {
-        delete[] decode_bin[i];
-    }
-    delete[] decode_bin;
-    delete[] decode_bin_flat;*/
 
 	return 0;
 }
